@@ -339,18 +339,31 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
           ))}
 
           {isLoading && (
-            <div className="flex gap-2 animate-fade-in">
+            <div className="flex gap-2 animate-fade-in items-start">
               <div className="w-8 h-8 rounded-full bg-chat-ai text-chat-ai-foreground border flex items-center justify-center">
                 <Bot className="w-4 h-4" />
               </div>
+
               <div className="max-w-[60%]">
                 <div className="bg-chat-ai text-chat-ai-foreground p-2 rounded-2xl shadow-sm inline-block">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
                     <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
                     <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    <div className="ml-3 text-sm">Thinking…</div>
                   </div>
                 </div>
+
+                <div className="mt-2 flex items-center gap-2">
+                  <button onClick={() => setThinkingDetailsOpen((s) => !s)} className="text-sm text-primary-foreground underline">{thinkingDetailsOpen ? 'Hide details' : 'View thinking'}</button>
+                  <button onClick={skipThinking} className="text-sm text-destructive">Skip</button>
+                </div>
+
+                {thinkingDetailsOpen && (
+                  <div className="mt-2 p-2 rounded border text-sm bg-card/70">
+                    <pre className="whitespace-pre-wrap">{thinkingNotes || 'The model is generating extended reasoning. This may take a few seconds.'}</pre>
+                  </div>
+                )}
               </div>
             </div>
           )}
