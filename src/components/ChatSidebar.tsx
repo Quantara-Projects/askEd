@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, MessageSquare, Trash2, X, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -76,8 +77,8 @@ export const Sidebar = ({
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-gradient-primary rounded-md flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">A</span>
+            <div className="w-6 h-6 rounded-md overflow-hidden flex items-center justify-center">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd logo" className="w-full h-full object-cover" />
             </div>
             <span className="font-semibold">AskEd</span>
           </div>
@@ -99,6 +100,11 @@ export const Sidebar = ({
           <Plus className="w-4 h-4 mr-2" />
           New Chat
         </Button>
+        <div className="mt-2">
+          <Link to="/">
+            <Button variant="outline" size="sm" className="w-full">Dashboard</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Chat List */}

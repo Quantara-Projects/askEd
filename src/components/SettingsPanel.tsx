@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { X, Key, User, Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -83,14 +84,14 @@ export const SettingsPanel = ({
       <SheetContent side="right" className="w-[400px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">A</span>
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd logo" className="w-full h-full object-cover" />
             </div>
             Settings
           </SheetTitle>
         </SheetHeader>
 
-        <div className="py-6 space-y-6">
+        <ScrollArea className="py-6 space-y-6 max-h-[60vh]">
           {/* User Settings */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -204,12 +205,12 @@ export const SettingsPanel = ({
           <div className="space-y-4 pt-6 border-t">
             <h3 className="text-lg font-medium">About AskEd</h3>
             <div className="text-sm text-muted-foreground space-y-2">
-              <p>Version 1.0.0</p>
-              <p>Educational AI Assistant designed to help students with study questions and learning support.</p>
+              <p>Version 0.0.1</p>
+              <p>Purpose: AskEd helps students learn clearly and safely by providing step-by-step explanations, examples, and study recommendations across subjects.</p>
               <p>All data is stored locally in your browser for privacy.</p>
             </div>
           </div>
-        </div>
+        </ScrollArea>
 
         {/* Action Buttons */}
         <div className="absolute bottom-6 left-6 right-6 flex gap-3">

@@ -187,8 +187,8 @@ export const ChatApp = () => {
                 <Menu className="h-5 w-5" />
               </Button>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">A</span>
+                <div className="w-8 h-8 rounded-lg overflow-hidden">
+                  <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd logo" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h1 className="font-semibold text-lg">AskEd</h1>
@@ -208,7 +208,7 @@ export const ChatApp = () => {
           </header>
 
           {/* Chat Area */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden min-h-0">
             {currentChat ? (
               <ChatInterface
                 chat={currentChat}
@@ -219,8 +219,8 @@ export const ChatApp = () => {
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center animate-fade-in">
-                  <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <span className="text-primary-foreground font-bold text-xl">A</span>
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto mb-4">
+                    <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd large logo" className="w-full h-full object-cover" />
                   </div>
                   <h2 className="text-2xl font-semibold mb-2">Welcome to AskEd!</h2>
                   <p className="text-muted-foreground mb-6 max-w-md">

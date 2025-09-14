@@ -24,8 +24,8 @@ export const UserNameModal = ({ isOpen, onSave }: UserNameModalProps) => {
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader className="text-center">
-          <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in">
-            <GraduationCap className="w-8 h-8 text-primary-foreground" />
+          <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto mb-4 animate-scale-in">
+            <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd logo" className="w-full h-full object-cover" />
           </div>
           <DialogTitle className="text-2xl">Welcome to AskEd!</DialogTitle>
           <DialogDescription className="text-base">
@@ -43,7 +43,7 @@ export const UserNameModal = ({ isOpen, onSave }: UserNameModalProps) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
-              className="transition-all duration-200 focus:shadow-elegant"
+              className="transition-all duration-200 focus:shadow-elegant text-center"
               autoFocus
             />
           </div>
