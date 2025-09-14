@@ -100,7 +100,7 @@
     --ring: 250 80% 70%;
 
     /* Dark mode chat colors */
-    --chat-user: 250 80% 70%;
+    --chat-user: 200 95% 55%;
     --chat-user-foreground: 222.2 84% 4.9%;
     --chat-ai: 217.2 32.6% 17.5%;
     --chat-ai-foreground: 210 40% 98%;
