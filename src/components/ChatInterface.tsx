@@ -211,8 +211,8 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
                 {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
 
-              <div className={`flex-1 max-w-[80%] group ${message.role === "user" ? "text-right" : ""}`}>
-                <div className={`p-3 rounded-2xl shadow-sm ${message.role === "user" ? "bg-chat-user text-chat-user-foreground ml-auto" : "bg-chat-ai text-chat-ai-foreground"}`}>
+              <div className={`max-w-[70%] group ${message.role === "user" ? "text-right self-end" : "self-start"}`}>
+                <div className={`inline-block p-3 rounded-2xl shadow-sm ${message.role === "user" ? "bg-chat-user text-chat-user-foreground ml-auto" : "bg-chat-ai text-chat-ai-foreground"}`}>
                   <div className="prose prose-sm max-w-none">
                     {message.content.split('\n').map((line, index) => (
                       line ? <p key={index} className="mb-1 last:mb-0">{line}</p> : <br key={index} />
