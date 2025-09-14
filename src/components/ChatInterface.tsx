@@ -299,13 +299,12 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
               key={message.id}
               className={`group relative flex gap-2 animate-fade-in ${message.role === "user" ? "flex-row-reverse" : ""}`}
             >
-              <div
-                className={`
-                w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                ${message.role === "user" ? "bg-chat-user text-chat-user-foreground" : "bg-chat-ai text-chat-ai-foreground border"}
-              `}
-              >
-                {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+              <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0`}>
+                {message.role === "user" ? (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-chat-user text-chat-user-foreground font-semibold">{(userName || 'U').charAt(0).toUpperCase()}</div>
+                ) : (
+                  <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd" className="w-full h-full object-cover" />
+                )}
               </div>
 
               <div className={`max-w-[70%] group ${message.role === "user" ? "text-right self-end" : "self-start"}`}>
@@ -317,22 +316,25 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
                   </div>
                 </div>
 
-                {message.role === "assistant" && (
-                  <div className="absolute right-2 bottom-8 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all flex items-center gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => copyMessage(message.content)} className="h-8">
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8">
-                      <ThumbsUp className="w-3 h-3" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8">
-                      <ThumbsDown className="w-3 h-3" />
-                    </Button>
+                {/* Timestamp + actions row */}
+                <div className={`mt-1 flex items-center gap-2 text-xs text-muted-foreground ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className="transition-transform transition-opacity group-hover:translate-y-2 group-hover:opacity-60">
+                    {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
-                )}
 
-                <div className={`text-xs text-muted-foreground mt-1 transition-transform transition-opacity ${message.role === "user" ? "text-right" : ""} group-hover:translate-y-2 group-hover:opacity-80`}>
-                  {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {message.role === "assistant" && (
+                    <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => copyMessage(message.content)} className="h-8 text-primary-foreground hover:bg-primary/10">
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 text-primary-foreground hover:bg-primary/10">
+                        <ThumbsUp className="w-3 h-3" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 text-primary-foreground hover:bg-primary/10">
+                        <ThumbsDown className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
