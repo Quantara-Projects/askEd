@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -32,11 +33,11 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Scroll to bottom when new messages are added
     if (scrollAreaRef.current) {
-      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
       if (scrollElement) {
         scrollElement.scrollTop = scrollElement.scrollHeight;
       }
@@ -44,34 +45,97 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
   }, [chat.messages]);
 
   const formatAIResponse = (response: string, userName: string): string => {
-    // Check if response already has the proper format
     if (response.includes(`Hello ${userName} 👋`)) {
       return response;
     }
-
-    // Basic AI response formatting
     const sections = response.split('\n\n');
     const greeting = `Hello ${userName} 👋, here's my answer to your question:\n\n`;
-    
     let formattedResponse = greeting;
-    
     if (sections.length > 1) {
-      // Main answer
       formattedResponse += `**Answer:**\n${sections[0]}\n\n`;
-      
-      // Additional sections
       if (sections.length > 2) {
         formattedResponse += `**Summary:**\n${sections[sections.length - 1]}\n\n`;
       }
-      
-      // Recommendation
       formattedResponse += `**Recommendation:**\nWould you like me to explain any specific part in more detail, or do you have questions about related topics?`;
     } else {
       formattedResponse += response + '\n\n';
       formattedResponse += `**Recommendation:**\nFeel free to ask me to elaborate on any part of this answer or ask related questions!`;
     }
-    
     return formattedResponse;
+  };
+
+  const getOpenRouterKey = (): string | null => {
+    return apiKey?.trim() || (import.meta as any).env?.VITE_OPENROUTER_API_KEY || null;
+  };
+
+  const buildSystemPrompt = (userNameForPrompt: string) => {
+    return [
+      "You are AskEd, an educational AI assistant designed to help students learn clearly, safely, and accurately.",
+      "Identity:",
+      "- Name: AskEd",
+      "- Creator: This app's team",
+      "- Purpose: Provide step-by-step explanations, tutoring help, and study guidance across subjects.",
+      `- When asked about yourself, answer concisely: 'I'm AskEd, your study assistant. I help with explanations, examples, and learning strategies.'`,
+      "Style:",
+      `- Be friendly and encouraging. Address the learner by name when known (e.g., ${userNameForPrompt}).`,
+      "- Prefer structured answers with bullets, steps, and short sections.",
+      "Strict rules:",
+      "- Do not provide medical, legal, or financial advice. Suggest consulting a professional.",
+      "- Do not claim to have real-world actions or personal experiences.",
+      "- Do not fabricate facts, sources, or citations. If unsure, say so.",
+      "- Do not output unsafe or disallowed content (hate, self-harm, explicit, malware).",
+      "- Do not request or store personal sensitive data.",
+      "- Keep answers brief when asked for summaries; be concise by default.",
+      "Output:",
+      "- Use plain text with simple formatting. Provide step-by-step reasoning only when explicitly requested.",
+    ].join("\n");
+  };
+
+  const callOpenRouter = async (message: string) => {
+    const key = getOpenRouterKey();
+    if (!key) {
+      const errorMsg = "Missing API key. Set it in Settings.";
+      toast({ title: "API key required", description: errorMsg, variant: "destructive" });
+      throw Object.assign(new Error(errorMsg), { status: 401 });
+    }
+
+    const systemPrompt = buildSystemPrompt(userName || "there");
+    const history = chat.messages.map((m) => ({ role: m.role, content: m.content }));
+    const body = {
+      model: "deepseek/deepseek-chat-v3.1:free",
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...history,
+        { role: "user", content: message },
+      ],
+    };
+
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "",
+        "X-Title": "AskEd",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const info = await safeJson(res);
+      const err = new Error((info && (info.error?.message || info.message)) || `HTTP ${res.status}`) as Error & { status?: number; info?: unknown };
+      err.status = res.status;
+      err.info = info;
+      throw err;
+    }
+
+    const data = await res.json();
+    const content: string = data?.choices?.[0]?.message?.content || "I couldn't find an answer.";
+    return content;
+  };
+
+  const safeJson = async (res: Response) => {
+    try { return await res.json(); } catch { return null; }
   };
 
   const sendMessage = async () => {
@@ -81,67 +145,36 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
     setInputMessage("");
     setIsLoading(true);
 
-    // Add user message
     onAddMessage(chat.id, { role: "user", content: userMessage });
 
     try {
-      // Simulate AI response (replace with actual API call)
-      const mockAIResponse = await simulateAIResponse(userMessage, apiKey);
-      const formattedResponse = formatAIResponse(mockAIResponse, userName);
-      
+      const aiRaw = await callOpenRouter(userMessage);
+      const formattedResponse = formatAIResponse(aiRaw, userName);
       onAddMessage(chat.id, { role: "assistant", content: formattedResponse });
-    } catch (error) {
-      console.error("Error sending message:", error);
-      const errorMessage = formatAIResponse(
+    } catch (error: any) {
+      const status = error?.status as number | undefined;
+      if (status === 401 || status === 403) {
+        toast({ title: "Authentication error", description: "Invalid or missing API key.", variant: "destructive" });
+      } else if (status === 429) {
+        toast({ title: "Rate limited", description: "Too many requests. Please try again later.", variant: "destructive" });
+      } else if (status && status >= 500) {
+        toast({ title: "Server error", description: "The AI service is temporarily unavailable.", variant: "destructive" });
+      } else {
+        navigate("/error", { state: { status, error: String(error?.message || error), info: error?.info } });
+      }
+      const fallback = formatAIResponse(
         "I apologize, but I'm having trouble processing your request right now. Please check your API key in settings and try again.",
         userName
       );
-      onAddMessage(chat.id, { role: "assistant", content: errorMessage });
-      
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please check your API key and try again.",
-        variant: "destructive",
-      });
+      onAddMessage(chat.id, { role: "assistant", content: fallback });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const simulateAIResponse = async (message: string, apiKey: string): Promise<string> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    // Mock educational responses based on common question types
-    const responses = {
-      math: "To solve this mathematical problem, let's break it down step by step. First, we identify the key components and then apply the appropriate formulas or theorems. This systematic approach helps ensure accuracy and understanding.",
-      science: "This is a fascinating scientific concept! The underlying principles involve several key factors that work together. Understanding the fundamental mechanisms will help you grasp not just this specific topic, but related concepts as well.",
-      history: "This historical event was shaped by multiple factors and had significant consequences. To understand it fully, we need to consider the social, political, and economic context of the time period.",
-      language: "Language learning involves understanding both structure and usage. The key is to practice regularly and pay attention to patterns. This concept connects to several important grammatical rules that will be useful in other contexts.",
-      default: "That's an excellent question! Let me provide you with a comprehensive explanation that covers the key concepts and practical applications. Understanding this topic will give you a strong foundation for related subjects."
-    };
-
-    // Simple keyword matching for demo
-    const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes('math') || lowerMessage.includes('equation') || lowerMessage.includes('calculate')) {
-      return responses.math;
-    } else if (lowerMessage.includes('science') || lowerMessage.includes('physics') || lowerMessage.includes('chemistry')) {
-      return responses.science;
-    } else if (lowerMessage.includes('history') || lowerMessage.includes('war') || lowerMessage.includes('century')) {
-      return responses.history;
-    } else if (lowerMessage.includes('grammar') || lowerMessage.includes('language') || lowerMessage.includes('write')) {
-      return responses.language;
-    } else {
-      return responses.default;
-    }
-  };
-
   const copyMessage = (content: string) => {
     navigator.clipboard.writeText(content);
-    toast({
-      title: "Copied!",
-      description: "Message copied to clipboard.",
-    });
+    toast({ title: "Copied!", description: "Message copied to clipboard." });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -152,44 +185,31 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 min-h-0">
         <div className="space-y-6 max-w-4xl mx-auto">
           {chat.messages.map((message) => (
             <div
               key={message.id}
-              className={`flex gap-3 animate-fade-in ${
-                message.role === "user" ? "flex-row-reverse" : ""
-              }`}
+              className={`flex gap-3 animate-fade-in ${message.role === "user" ? "flex-row-reverse" : ""}`}
             >
-              {/* Avatar */}
-              <div className={`
+              <div
+                className={`
                 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                ${message.role === "user" 
-                  ? "bg-chat-user text-chat-user-foreground" 
-                  : "bg-chat-ai text-chat-ai-foreground border"
-                }
-              `}>
-                {message.role === "user" ? (
-                  <User className="w-4 h-4" />
-                ) : (
-                  <Bot className="w-4 h-4" />
-                )}
+                ${message.role === "user" ? "bg-chat-user text-chat-user-foreground" : "bg-chat-ai text-chat-ai-foreground border"}
+              `}
+              >
+                {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
 
-              {/* Message Content */}
-              <div className={`
-                flex-1 max-w-[80%] group
-                ${message.role === "user" ? "text-right" : ""}
-              `}>
-                <div className={`
+              <div className={`flex-1 max-w-[80%] group ${message.role === "user" ? "text-right" : ""}`}>
+                <div
+                  className={`
                   p-4 rounded-2xl shadow-sm
-                  ${message.role === "user"
-                    ? "bg-chat-user text-chat-user-foreground ml-auto"
-                    : "bg-chat-ai text-chat-ai-foreground"
-                  }
-                `}>
+                  ${message.role === "user" ? "bg-chat-user text-chat-user-foreground ml-auto" : "bg-chat-ai text-chat-ai-foreground"}
+                `}
+                >
                   <div className="prose prose-sm max-w-none">
                     {message.content.split('\n').map((line, index) => {
                       if (line.startsWith('**') && line.endsWith('**')) {
@@ -204,15 +224,9 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
                   </div>
                 </div>
 
-                {/* Message Actions */}
                 {message.role === "assistant" && (
                   <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyMessage(message.content)}
-                      className="h-8"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => copyMessage(message.content)} className="h-8">
                       <Copy className="w-3 h-3" />
                     </Button>
                     <Button variant="ghost" size="sm" className="h-8">
@@ -224,15 +238,8 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
                   </div>
                 )}
 
-                {/* Timestamp */}
-                <div className={`
-                  text-xs text-muted-foreground mt-1
-                  ${message.role === "user" ? "text-right" : ""}
-                `}>
-                  {message.timestamp.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
+                <div className={`text-xs text-muted-foreground mt-1 ${message.role === "user" ? "text-right" : ""}`}>
+                  {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
             </div>
@@ -260,6 +267,7 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
       {/* Input Area */}
       <div className="border-t bg-card/50 backdrop-blur-sm p-4">
         <div className="max-w-4xl mx-auto">
+          <p className="text-xs text-muted-foreground mb-2 text-center">AskEd can make errors, please double check the information.</p>
           <div className="flex gap-2">
             <div className="flex-1 relative">
               <Textarea
@@ -271,21 +279,13 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
                 className="resize-none min-h-[44px] max-h-32 pr-12"
                 disabled={isLoading}
               />
-              <div className="absolute right-2 bottom-2 text-xs text-muted-foreground">
-                {inputMessage.length}/2000
-              </div>
+              <div className="absolute right-2 bottom-2 text-xs text-muted-foreground">{inputMessage.length}/2000</div>
             </div>
-            <Button
-              onClick={sendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              className="bg-gradient-primary hover:shadow-glow transition-all duration-300 h-11"
-            >
+            <Button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className="bg-gradient-primary hover:shadow-glow transition-all duration-300 h-11">
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <div className="text-xs text-muted-foreground mt-2 text-center">
-            Press Enter to send, Shift+Enter for new line
-          </div>
+          <div className="text-xs text-muted-foreground mt-2 text-center">Press Enter to send, Shift+Enter for new line</div>
         </div>
       </div>
     </div>
