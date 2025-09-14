@@ -33,7 +33,10 @@ const Home = () => {
           </div>
 
           <section id="features" className="mt-16 text-left">
-            <h2 className="text-2xl font-semibold mb-6">Features</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold mb-6">Features</h2>
+              <button onClick={() => setShowDetails((s) => !s)} className="text-sm text-primary-foreground bg-gradient-primary px-3 py-1 rounded-md">{showDetails ? 'Hide Details' : 'View Implementation Details'}</button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg border bg-card/50 hover:shadow-glow transition">
                 <div className="text-3xl mb-2">🧠</div>
@@ -72,6 +75,12 @@ const Home = () => {
               </div>
             </div>
           </section>
+
+          {showDetails && (
+            <div className="mt-6 p-4 rounded-lg border bg-card/50 max-h-[40vh] overflow-auto text-sm">
+              <pre className="whitespace-pre-wrap">1. Gamification & Engagement\n\nPurpose: Encourage consistent usage and make learning fun.\n\nComponents: Streak tracker, badges, points system, leaderboards, mini-quizzes.\n\nStep-by-Step Implementation:\n\nPoints System:\nHow: Each time a user interacts with the AI or completes a question/quiz, increment their points in localStorage or database.\nCode Example:\nlet points = Number(localStorage.getItem('points') || '0'); points += 10; localStorage.setItem('points', String(points));\n\nStreak Tracker:\nHow: Track daily logins using dates in localStorage. Increment streak if last login was yesterday.\n\nBadges:\nHow: Assign badges for achievements (e.g., “First 100 points,” “Completed 5 quizzes”). Trigger a popup animation when unlocked.\n\nMini-Quizzes:\nHow: Generate 3–5 multiple-choice questions from AI chat logs. Present in a popup modal.\n\nLeaderboards:\nHow: Collect points from multiple users (database required). Display top users globally or per group.\n\n2. Personalized AI Experience\n\nAdaptive Learning:\nHow: Store topics user interacts with in database/localStorage. Track weak areas (e.g., questions user revisits). AI prioritizes these in suggestions.\n\nVoice Input/Output:\nHow: Use Web Speech API for voice input and speechSynthesis for output.\n\nCustom Avatars:\nHow: Provide selectable avatars with small animations.\n\n3. Community & Sharing\n\nStudy Groups:\nHow: Create a database model for groups; users can join/leave.\n\nPublic Knowledge Sharing:\nHow: Add a “Share Answer” button for AI responses. When clicked, the answer is added to a public feed.\n\nTranslate Answers:\nHow: Use AI translation API or Google Translate API.\n\n4. Smart Recommendations:\nNext-Step Learning Suggestions and Resource Aggregation.\n\n5. Advanced AI Tools:\nTopic Summarizer, Homework Checker, AI Tutor Mode.\n\n6. UI & Animations:\nFeature cards, focus mode, small interactive feedback animations.\n\n(See product plan for full details.)</pre>
+            </div>
+          )}
         </div>
       </main>
 
