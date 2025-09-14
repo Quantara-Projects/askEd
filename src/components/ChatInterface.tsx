@@ -44,24 +44,31 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
     }
   }, [chat.messages]);
 
-  const formatAIResponse = (response: string, userName: string): string => {
-    if (response.includes(`Hello ${userName} 👋`)) {
-      return response;
-    }
-    const sections = response.split('\n\n');
-    const greeting = `Hello ${userName} 👋, here's my answer to your question:\n\n`;
-    let formattedResponse = greeting;
-    if (sections.length > 1) {
-      formattedResponse += `**Answer:**\n${sections[0]}\n\n`;
-      if (sections.length > 2) {
-        formattedResponse += `**Summary:**\n${sections[sections.length - 1]}\n\n`;
-      }
-      formattedResponse += `**Recommendation:**\nWould you like me to explain any specific part in more detail, or do you have questions about related topics?`;
+  const generateRecommendations = (message: string) => {
+    const lower = message.toLowerCase();
+    const recs: string[] = [];
+    if (/math|equation|calculate|solve|integral|derivative/.test(lower)) {
+      recs.push("Try breaking the problem into smaller steps and check worked examples for similar problems.");
+      recs.push("Would you like a step-by-step walkthrough or a solved example?");
+    } else if (/science|physics|chemistry|biology/.test(lower)) {
+      recs.push("Consider drawing diagrams and identifying core principles involved.");
+      recs.push("I can provide experiment examples or key formulas if you want.");
+    } else if (/history|war|century|period/.test(lower)) {
+      recs.push("Look for primary sources and timelines to understand context.");
+      recs.push("I can summarize key events or provide recommended readings.");
+    } else if (/grammar|write|essay|language/.test(lower)) {
+      recs.push("Try outlining your main points first and then expand each paragraph.");
+      recs.push("I can help edit or provide sample sentences if you share a draft.");
     } else {
-      formattedResponse += response + '\n\n';
-      formattedResponse += `**Recommendation:**\nFeel free to ask me to elaborate on any part of this answer or ask related questions!`;
+      recs.push("If you'd like, ask me for a summary, examples, or further practice problems.");
     }
-    return formattedResponse;
+    return recs;
+  };
+
+  const formatAIResponse = (response: string, userName: string, userQuestion: string): string => {
+    const trimmed = response?.trim() || "";
+    const recommendations = generateRecommendations(userQuestion).map((r, i) => `${i + 1}. ${r}`).join("\n");
+    return `${trimmed}\n\nRecommendations:\n${recommendations}`;
   };
 
   const getOpenRouterKey = (): string | null => {
@@ -188,11 +195,11 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
     <div className="flex flex-col h-full min-h-0">
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 min-h-0">
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-3 max-w-3xl mx-auto">
           {chat.messages.map((message) => (
             <div
               key={message.id}
-              className={`flex gap-3 animate-fade-in ${message.role === "user" ? "flex-row-reverse" : ""}`}
+              className={`flex gap-2 animate-fade-in ${message.role === "user" ? "flex-row-reverse" : ""}`}
             >
               <div
                 className={`
@@ -204,23 +211,11 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
               </div>
 
               <div className={`flex-1 max-w-[80%] group ${message.role === "user" ? "text-right" : ""}`}>
-                <div
-                  className={`
-                  p-4 rounded-2xl shadow-sm
-                  ${message.role === "user" ? "bg-chat-user text-chat-user-foreground ml-auto" : "bg-chat-ai text-chat-ai-foreground"}
-                `}
-                >
+                <div className={`p-3 rounded-2xl shadow-sm ${message.role === "user" ? "bg-chat-user text-chat-user-foreground ml-auto" : "bg-chat-ai text-chat-ai-foreground"}`}>
                   <div className="prose prose-sm max-w-none">
-                    {message.content.split('\n').map((line, index) => {
-                      if (line.startsWith('**') && line.endsWith('**')) {
-                        return (
-                          <h4 key={index} className="font-semibold mt-3 mb-1 first:mt-0">
-                            {line.slice(2, -2)}
-                          </h4>
-                        );
-                      }
-                      return line ? <p key={index} className="mb-2 last:mb-0">{line}</p> : <br key={index} />;
-                    })}
+                    {message.content.split('\n').map((line, index) => (
+                      line ? <p key={index} className="mb-1 last:mb-0">{line}</p> : <br key={index} />
+                    ))}
                   </div>
                 </div>
 
@@ -246,12 +241,12 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
           ))}
 
           {isLoading && (
-            <div className="flex gap-3 animate-fade-in">
+            <div className="flex gap-2 animate-fade-in">
               <div className="w-8 h-8 rounded-full bg-chat-ai text-chat-ai-foreground border flex items-center justify-center">
                 <Bot className="w-4 h-4" />
               </div>
               <div className="flex-1">
-                <div className="bg-chat-ai text-chat-ai-foreground p-4 rounded-2xl shadow-sm">
+                <div className="bg-chat-ai text-chat-ai-foreground p-3 rounded-2xl shadow-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
                     <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
