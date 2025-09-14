@@ -222,7 +222,7 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
                 </div>
 
                 {message.role === "assistant" && (
-                  <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute right-2 bottom-8 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all flex items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={() => copyMessage(message.content)} className="h-8">
                       <Copy className="w-3 h-3" />
                     </Button>
@@ -235,7 +235,7 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
                   </div>
                 )}
 
-                <div className={`text-xs text-muted-foreground mt-1 ${message.role === "user" ? "text-right" : ""}`}>
+                <div className={`text-xs text-muted-foreground mt-1 transition-transform transition-opacity ${message.role === "user" ? "text-right" : ""} group-hover:translate-y-2 group-hover:opacity-80`}>
                   {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
