@@ -29,8 +29,44 @@ const Home = () => {
           </div>
 
           <section id="features" className="mt-16 text-left">
-            <h2 className="text-2xl font-semibold mb-4">Features</h2>
-            <p className="text-muted-foreground">Adaptive learning, quizzes, summaries, gamification, and more.</p>
+            <h2 className="text-2xl font-semibold mb-6">Features</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="p-4 rounded-lg border bg-card/50 hover:shadow-glow transition">
+                <div className="text-3xl mb-2">🧠</div>
+                <h3 className="font-semibold">Adaptive Learning</h3>
+                <p className="text-sm text-muted-foreground mt-2">Personalized study plans that adapt to your strengths and weaknesses.</p>
+              </div>
+
+              <div className="p-4 rounded-lg border bg-card/50 hover:shadow-glow transition">
+                <div className="text-3xl mb-2">🧩</div>
+                <h3 className="font-semibold">Gamification</h3>
+                <p className="text-sm text-muted-foreground mt-2">Streaks, badges, and leaderboards to keep learners engaged.</p>
+              </div>
+
+              <div className="p-4 rounded-lg border bg-card/50 hover:shadow-glow transition">
+                <div className="text-3xl mb-2">📚</div>
+                <h3 className="font-semibold">Smart Summaries</h3>
+                <p className="text-sm text-muted-foreground mt-2">Summarize long articles, textbooks, or lecture notes instantly.</p>
+              </div>
+
+              <div className="p-4 rounded-lg border bg-card/50 hover:shadow-glow transition">
+                <div className="text-3xl mb-2">✍️</div>
+                <h3 className="font-semibold">Homework Checker</h3>
+                <p className="text-sm text-muted-foreground mt-2">Check math, code, and written work with step-by-step feedback.</p>
+              </div>
+
+              <div className="p-4 rounded-lg border bg-card/50 hover:shadow-glow transition">
+                <div className="text-3xl mb-2">🎤</div>
+                <h3 className="font-semibold">Voice Input & Output</h3>
+                <p className="text-sm text-muted-foreground mt-2">Use your voice to ask questions and listen to explanations.</p>
+              </div>
+
+              <div className="p-4 rounded-lg border bg-card/50 hover:shadow-glow transition">
+                <div className="text-3xl mb-2">🔒</div>
+                <h3 className="font-semibold">Privacy & Control</h3>
+                <p className="text-sm text-muted-foreground mt-2">Control your data, API keys, and privacy settings from the dashboard.</p>
+              </div>
+            </div>
           </section>
         </div>
       </main>
