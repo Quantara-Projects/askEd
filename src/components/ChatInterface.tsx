@@ -374,7 +374,13 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
       <div className="border-t bg-card/50 backdrop-blur-sm p-4">
         <div className="max-w-4xl mx-auto">
           <p className="text-xs text-muted-foreground mb-2 text-center">AskEd can make errors, please double check the information.</p>
-          <div className="flex gap-2">
+          {/* Toolbar: Think Longer / Web Search - centered and horizontal */}
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <Button onClick={sendThinkLonger} disabled={!inputMessage.trim() || isLoading} variant="outline" size="sm">Think Longer</Button>
+            <Button onClick={useWebSearch} disabled={!inputMessage.trim() || isLoading} variant="outline" size="sm">Web Search</Button>
+          </div>
+
+          <div className="flex gap-2 items-end">
             <div className="flex-1 relative">
               <Textarea
                 ref={textareaRef}
@@ -387,13 +393,9 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
               />
               <div className="absolute right-2 bottom-2 text-xs text-muted-foreground">{inputMessage.length}/2000</div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className="bg-gradient-primary hover:shadow-glow transition-all duration-300 h-11 w-11">
-                <Send className="w-4 h-4" />
-              </Button>
-              <Button onClick={sendThinkLonger} disabled={!inputMessage.trim() || isLoading} variant="outline" size="sm" className="h-9">Think Longer</Button>
-              <Button onClick={useWebSearch} disabled={!inputMessage.trim() || isLoading} variant="ghost" size="sm" className="h-9">Web Search</Button>
-            </div>
+            <Button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className="bg-gradient-primary hover:shadow-glow transition-all duration-300 h-11 w-11">
+              <Send className="w-4 h-4" />
+            </Button>
           </div>
           <div className="text-xs text-muted-foreground mt-2 text-center">Press Enter to send, Shift+Enter for new line</div>
         </div>
