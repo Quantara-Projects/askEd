@@ -177,6 +177,22 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
     try { return await res.json(); } catch { return null; }
   };
 
+  const fetchWikipediaSummary = async (query: string) => {
+    try {
+      const search = encodeURIComponent(query);
+      const opensearch = await fetch(`https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=${search}&limit=1`);
+      const opData = await opensearch.json();
+      const title = opData?.[1]?.[0];
+      if (!title) return null;
+      const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+      if (!summaryRes.ok) return null;
+      const summary = await summaryRes.json();
+      return summary.extract || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
 
@@ -210,6 +226,55 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const sendThinkLonger = async () => {
+    if (!inputMessage.trim()) return;
+    const userMessage = inputMessage.trim();
+    setIsLoading(true);
+    onAddMessage(chat.id, { role: "user", content: userMessage });
+    try {
+      const aiRaw = await callOpenRouter(userMessage, { thinkLonger: true });
+      const formattedResponse = formatAIResponse(aiRaw, userName, userMessage);
+      onAddMessage(chat.id, { role: "assistant", content: formattedResponse });
+    } catch (err: any) {
+      if ((err as any)?.name === 'AbortError' || err.status === 0) {
+        toast({ title: "Thinking skipped", description: "The thinking process was skipped.", variant: "default" });
+      } else {
+        toast({ title: "Error", description: String(err?.message || err), variant: "destructive" });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const useWebSearch = async () => {
+    if (!inputMessage.trim()) return;
+    const query = inputMessage.trim();
+    setIsLoading(true);
+    onAddMessage(chat.id, { role: "user", content: `${query} (requested web search)` });
+    try {
+      const wiki = await fetchWikipediaSummary(query);
+      const aiRaw = await callOpenRouter(query, { wiki });
+      const formattedResponse = formatAIResponse(aiRaw, userName, query);
+      onAddMessage(chat.id, { role: "assistant", content: formattedResponse });
+      // open search tabs for user
+      window.open(`https://search.brave.com/search?q=${encodeURIComponent(query)}`, '_blank');
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+    } catch (err: any) {
+      toast({ title: "Search error", description: String(err?.message || err), variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const skipThinking = () => {
+    if (currentController.current) {
+      currentController.current.abort();
+      currentController.current = null;
+    }
+    setIsLoading(false);
+    setThinkingNotes(null);
   };
 
   const copyMessage = (content: string) => {
