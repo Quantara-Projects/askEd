@@ -103,7 +103,8 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
     ].join("\n");
   };
 
-  const callOpenRouter = async (message: string) => {
+  type CallOptions = { thinkLonger?: boolean; wiki?: string | null };
+  const callOpenRouter = async (message: string, options?: CallOptions) => {
     const key = getOpenRouterKey();
     if (!key) {
       const errorMsg = "Missing API key. Set it in Settings.";
@@ -111,15 +112,30 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
       throw Object.assign(new Error(errorMsg), { status: 401 });
     }
 
+    // Abort previous controller
+    if (currentController.current) {
+      try { currentController.current.abort(); } catch {};
+    }
+    const controller = new AbortController();
+    currentController.current = controller;
+
     const systemPrompt = buildSystemPrompt(userName || "there");
     const history = chat.messages.map((m) => ({ role: m.role, content: m.content }));
+
+    const messages: any[] = [ { role: "system", content: systemPrompt }, ...history, { role: "user", content: message } ];
+
+    if (options?.wiki) {
+      messages.splice(1, 0, { role: "system", content: `Web search summary (Wikipedia): ${options.wiki}` });
+    }
+
+    if (options?.thinkLonger) {
+      messages.push({ role: "system", content: "Please think longer about this question and provide detailed reasoning and additional examples." });
+      setThinkingNotes("Requesting deeper reasoning from the model...");
+    }
+
     const body = {
       model: "deepseek/deepseek-chat-v3.1:free",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...history,
-        { role: "user", content: message },
-      ],
+      messages,
     };
 
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -131,19 +147,30 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
 
-    if (!res.ok) {
-      const info = await safeJson(res);
-      const err = new Error((info && (info.error?.message || info.message)) || `HTTP ${res.status}`) as Error & { status?: number; info?: unknown };
-      err.status = res.status;
-      err.info = info;
+    try {
+      if (!res.ok) {
+        const info = await safeJson(res);
+        const err = new Error((info && (info.error?.message || info.message)) || `HTTP ${res.status}`) as Error & { status?: number; info?: unknown };
+        err.status = res.status;
+        err.info = info;
+        throw err;
+      }
+
+      const data = await res.json();
+      const content: string = data?.choices?.[0]?.message?.content || "I couldn't find an answer.";
+      currentController.current = null;
+      setThinkingNotes(null);
+      return content;
+    } catch (err) {
+      currentController.current = null;
+      if ((err as any)?.name === 'AbortError') {
+        throw Object.assign(new Error('Request aborted'), { status: 0 });
+      }
       throw err;
     }
-
-    const data = await res.json();
-    const content: string = data?.choices?.[0]?.message?.content || "I couldn't find an answer.";
-    return content;
   };
 
   const safeJson = async (res: Response) => {
