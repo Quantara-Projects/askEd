@@ -67,8 +67,9 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
 
   const formatAIResponse = (response: string, userName: string, userQuestion: string): string => {
     const trimmed = response?.trim() || "";
-    const recommendations = generateRecommendations(userQuestion).map((r, i) => `${i + 1}. ${r}`).join("\n");
-    return `${trimmed}\n\nRecommendations:\n${recommendations}`;
+    const recommendations = generateRecommendations(userQuestion);
+    const recText = recommendations.length ? `\n\n${recommendations.join('\n')}` : "";
+    return `${trimmed}${recText}`;
   };
 
   const getOpenRouterKey = (): string | null => {
@@ -246,8 +247,8 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
               <div className="w-8 h-8 rounded-full bg-chat-ai text-chat-ai-foreground border flex items-center justify-center">
                 <Bot className="w-4 h-4" />
               </div>
-              <div className="flex-1">
-                <div className="bg-chat-ai text-chat-ai-foreground p-3 rounded-2xl shadow-sm">
+              <div className="max-w-[60%]">
+                <div className="bg-chat-ai text-chat-ai-foreground p-2 rounded-2xl shadow-sm inline-block">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
                     <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
