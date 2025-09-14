@@ -205,8 +205,8 @@ export const SettingsPanel = ({
           <div className="space-y-4 pt-6 border-t">
             <h3 className="text-lg font-medium">About AskEd</h3>
             <div className="text-sm text-muted-foreground space-y-2">
-              <p>Version 1.0.0</p>
-              <p>Educational AI Assistant designed to help students with study questions and learning support.</p>
+              <p>Version 0.0.1</p>
+              <p>Purpose: AskEd helps students learn clearly and safely by providing step-by-step explanations, examples, and study recommendations across subjects.</p>
               <p>All data is stored locally in your browser for privacy.</p>
             </div>
           </div>
