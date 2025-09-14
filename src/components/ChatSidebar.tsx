@@ -76,8 +76,8 @@ export const Sidebar = ({
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-gradient-primary rounded-md flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">A</span>
+            <div className="w-6 h-6 rounded-md overflow-hidden flex items-center justify-center">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd logo" className="w-full h-full object-cover" />
             </div>
             <span className="font-semibold">AskEd</span>
           </div>
