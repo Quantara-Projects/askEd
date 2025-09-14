@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
 const Home = () => {
+  const [showDetails, setShowDetails] = useState(false);
   return (
     <div className="min-h-screen flex flex-col">
       <header className="fixed w-full top-0 z-50 bg-card/60 backdrop-blur-sm border-b">
