@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { X, Key, User, Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SettingsPanelProps {
   isOpen: boolean;
