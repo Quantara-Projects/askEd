@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -156,7 +157,7 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
 
     try {
       const aiRaw = await callOpenRouter(userMessage);
-      const formattedResponse = formatAIResponse(aiRaw, userName);
+      const formattedResponse = formatAIResponse(aiRaw, userName, userMessage);
       onAddMessage(chat.id, { role: "assistant", content: formattedResponse });
     } catch (error: any) {
       const status = error?.status as number | undefined;
@@ -171,7 +172,8 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
       }
       const fallback = formatAIResponse(
         "I apologize, but I'm having trouble processing your request right now. Please check your API key in settings and try again.",
-        userName
+        userName,
+        userMessage
       );
       onAddMessage(chat.id, { role: "assistant", content: fallback });
     } finally {
