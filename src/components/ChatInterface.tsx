@@ -340,8 +340,8 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
 
           {isLoading && (
             <div className="flex gap-2 animate-fade-in items-start">
-              <div className="w-8 h-8 rounded-full bg-chat-ai text-chat-ai-foreground border flex items-center justify-center">
-                <Bot className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center border" style={{background: 'transparent'}}>
+                <img src="https://cdn.builder.io/api/v1/image/assets%2Ff7636dbc154444f9897eafaf4c70d8a5%2F72ff5047f88d49358f7660cd47a9a514?format=webp&width=800" alt="AskEd" className="w-full h-full object-cover" />
               </div>
 
               <div className="max-w-[60%]">
@@ -361,7 +361,7 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
 
                 {thinkingDetailsOpen && (
                   <div className="mt-2 p-2 rounded border text-sm bg-card/70">
-                    <pre className="whitespace-pre-wrap">{thinkingNotes || 'The model is generating extended reasoning. This may take a few seconds.'}</pre>
+                    <pre className="whitespace-pre-wrap">{thinkingNotes || `Observations: The user asked: "${inputMessage || '...'}"\nApproach: Identify key concepts, outline steps, provide examples, and summarize.`}</pre>
                   </div>
                 )}
               </div>
