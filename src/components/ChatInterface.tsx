@@ -76,6 +76,10 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
     return apiKey?.trim() || (import.meta as any).env?.VITE_OPENROUTER_API_KEY || null;
   };
 
+  const currentController = useRef<AbortController | null>(null);
+  const [thinkingDetailsOpen, setThinkingDetailsOpen] = useState(false);
+  const [thinkingNotes, setThinkingNotes] = useState<string | null>(null);
+
   const buildSystemPrompt = (userNameForPrompt: string) => {
     return [
       "You are AskEd, an educational AI assistant designed to help students learn clearly, safely, and accurately.",
