@@ -201,7 +201,7 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
           {chat.messages.map((message) => (
             <div
               key={message.id}
-              className={`flex gap-2 animate-fade-in ${message.role === "user" ? "flex-row-reverse" : ""}`}
+              className={`group relative flex gap-2 animate-fade-in ${message.role === "user" ? "flex-row-reverse" : ""}`}
             >
               <div
                 className={`
