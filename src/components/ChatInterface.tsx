@@ -374,9 +374,13 @@ export const ChatInterface = ({ chat, userName, apiKey, onAddMessage }: ChatInte
               />
               <div className="absolute right-2 bottom-2 text-xs text-muted-foreground">{inputMessage.length}/2000</div>
             </div>
-            <Button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className="bg-gradient-primary hover:shadow-glow transition-all duration-300 h-11">
-              <Send className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className="bg-gradient-primary hover:shadow-glow transition-all duration-300 h-11 w-11">
+                <Send className="w-4 h-4" />
+              </Button>
+              <Button onClick={sendThinkLonger} disabled={!inputMessage.trim() || isLoading} variant="outline" size="sm" className="h-9">Think Longer</Button>
+              <Button onClick={useWebSearch} disabled={!inputMessage.trim() || isLoading} variant="ghost" size="sm" className="h-9">Web Search</Button>
+            </div>
           </div>
           <div className="text-xs text-muted-foreground mt-2 text-center">Press Enter to send, Shift+Enter for new line</div>
         </div>
