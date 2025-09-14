@@ -100,6 +100,11 @@ export const Sidebar = ({
           <Plus className="w-4 h-4 mr-2" />
           New Chat
         </Button>
+        <div className="mt-2">
+          <Link to="/">
+            <Button variant="outline" size="sm" className="w-full">Dashboard</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Chat List */}
